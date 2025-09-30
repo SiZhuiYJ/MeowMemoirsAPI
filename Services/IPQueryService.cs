@@ -4,18 +4,21 @@ using MeowMemoirsAPI.Parser;
 
 namespace MeowMemoirsAPI.Services
 {
-    public class IPQueryService: IIPQueryService
+    public class IPQueryService : IIPQueryService
     {
+        private readonly string _originalServer;
         private readonly QQWryParser _qqwryParser;
         private readonly IPDBParser _ipdbParser;
 
-        public IPQueryService()
+        public IPQueryService(IConfiguration configuration)
         {
-            var qqwryPath = @"/www/wwwroot/www.meowmemoirs.cn.api/UserFiles/Original/StaticFile/IPDB/qqwry.dat";
-            var ipdbPath = @"D:/www/wwwroot/www.meowmemoirs.cn.api/UserFiles/Original/StaticFile/IPDB/ipv6wry.db";
+            var qqwryPath = @"StaticFile/IPDB/qqwry.dat";
+            var ipdbPath = @"StaticFile/IPDB/ipv6wry.db";
+            _originalServer = configuration["FileStorage:OriginalPath"] ?? "/www/wwwroot/www.meowmemoirs.cn.api/UserFiles/Original/";
 
-            _qqwryParser = new QQWryParser(qqwryPath);
-            _ipdbParser = new IPDBParser(ipdbPath);
+            _qqwryParser = new QQWryParser(Path.Combine(_originalServer, qqwryPath));
+            _ipdbParser = new IPDBParser(Path.Combine(_originalServer, ipdbPath));
+            Directory.CreateDirectory(_originalServer);
         }
 
         public IPLocation Query(string ip)
