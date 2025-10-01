@@ -42,6 +42,7 @@ Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>(); // 添加 IHttpContextAccessor 到依赖注入容器 访问 HttpContext
 builder.Services.AddSingleton<ILogService, LogService>();// 添加 LogService 到依赖注入容器 日志服务
 builder.Services.AddSingleton<IIPQueryService,IPQueryService>();// 添加 IPQueryService 到依赖注入容器 IP查询服务
+builder.Services.AddSingleton<ISimpleIPQueryService, SimpleIPQueryService>();// 添加 SimpleIPQueryService 到依赖注入容器 简单IP查询服务
 #endregion
 
 //AddTransient：每次请求都会创建新实例，适用于无状态服务。
