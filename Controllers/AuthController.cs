@@ -21,13 +21,13 @@ namespace MeowMemoirsAPI.Controllers
     /// <param name="jwtService"></param>
     [Route("MeowMemoirs/[controller]")]
     [ApiController]
-    public class AuthController(ILogService logService, IAuthService authService, IHttpContextAccessor httpContextAccessor, IJwtService jwtService, MyRainbowContext DbContext) : ControllerBase
+    public class AuthController(ILogService logService, IAuthService authService, IHttpContextAccessor httpContextAccessor, IJwtService jwtService, MyRainbowContext dbContext) : ControllerBase
     {
         private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
         private readonly ILogService _logService = logService;
         private readonly IAuthService _authService = authService;
         private readonly IJwtService _jwtService = jwtService;
-        private readonly MyRainbowContext _dbContext = DbContext;
+        private readonly MyRainbowContext _dbContext = dbContext;
 
         // 提取公共方法：获取客户端IP和UserAgent
         private (string? ip, string agent) GetClientInfo()
@@ -124,7 +124,7 @@ namespace MeowMemoirsAPI.Controllers
                     SecPwd = addUser.SecPwd,
                     UserEmail = addUser.UserEmail // 直接赋值，EF会忽略null值
                 };
-
+                
                 _dbContext.Users.Add(newUser);
                 await _dbContext.SaveChangesAsync();
 

@@ -11,10 +11,15 @@ using System.Text.Json;
 
 namespace MeowMemoirsAPI.Controllers
 {
-
+    /// <summary>
+    /// 访问控制器
+    /// </summary>
+    /// <param name="logService"></param>
+    /// <param name="ipQueryService"></param>
+    /// <param name="httpContextAccessor"></param>
     [Route("MeowMemoirs/[controller]")]
     [ApiController]
-    public class AccessController(ILogService logService,IIPQueryService ipQueryService, IHttpContextAccessor httpContextAccessor) : ControllerBase
+    public class AccessController(ILogService logService, IIPQueryService ipQueryService, IHttpContextAccessor httpContextAccessor) : ControllerBase
     {
         private readonly ILogService _logService = logService;
         private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
@@ -31,7 +36,7 @@ namespace MeowMemoirsAPI.Controllers
             try
             {
                 // 获取浏览器标识
-                var userAgent = _httpContextAccessor.HttpContext?.Request.Headers["User-Agent"].ToString();
+                var userAgent = _httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString();
                 var result = _ipQueryService.Query(ip);
                 if (result == null)
                     return NotFound($"IP {ip} not found in database");
@@ -40,7 +45,7 @@ namespace MeowMemoirsAPI.Controllers
                 result.IP = ip;
                 _logService.LogLogin(new LogLogIn
                 {
-                    Token = userAgent,
+                    Token = userAgent ?? "",
                     Ip = ip ?? "",
                     DateTime = DateTime.Now,
                     Message = "访问记录",
@@ -83,7 +88,7 @@ namespace MeowMemoirsAPI.Controllers
 
                 _logService.LogLogin(new LogLogIn
                 {
-                    Token = userAgent,
+                    Token = userAgent ??"",
                     Ip = ip ?? "",
                     DateTime = DateTime.Now,
                     Message = "访问记录",

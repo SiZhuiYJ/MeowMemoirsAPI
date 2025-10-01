@@ -24,6 +24,8 @@ public partial class MyRainbowContext : DbContext
 
     public virtual DbSet<Class> Classes { get; set; }
 
+    public virtual DbSet<IpAccessLog> IpAccessLogs { get; set; }
+
     public virtual DbSet<Loginsession> Loginsessions { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
@@ -231,6 +233,104 @@ public partial class MyRainbowContext : DbContext
             entity.HasOne(d => d.User).WithMany(p => p.Classes)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("classes_ibfk_1");
+        });
+
+        modelBuilder.Entity<IpAccessLog>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PRIMARY");
+
+            entity.ToTable("ip_access_log", tb => tb.HasComment("IP访问记录表，用于安全审计、流量分析和行为追踪"));
+
+            entity.HasIndex(e => e.IpAddress, "idx_ip");
+
+            entity.HasIndex(e => e.RequestTime, "idx_time");
+
+            entity.Property(e => e.Id)
+                .HasComment("自增主键，唯一标识每条记录")
+                .HasColumnName("id");
+            entity.Property(e => e.BrowserName)
+                .HasMaxLength(50)
+                .HasComment("浏览器名称及版本，示例：Chrome 118、Firefox 119")
+                .HasColumnName("browser_name");
+            entity.Property(e => e.DeviceType)
+                .HasMaxLength(20)
+                .HasComment("设备类型（通过User-Agent解析），示例：Mobile、Desktop、Tablet")
+                .HasColumnName("device_type");
+            entity.Property(e => e.ExtraNotes)
+                .HasComment("备注信息（如攻击类型），示例：\"SQL Injection Attempt\"")
+                .HasColumnType("text")
+                .HasColumnName("extra_notes");
+            entity.Property(e => e.GeoLocation)
+                .HasComment("IP地理位置信息（JSON格式），示例：`{\"country\": \"CN\", \"city\": \"Beijing\"}`")
+                .HasColumnType("json")
+                .HasColumnName("geo_location");
+            entity.Property(e => e.Headers)
+                .HasComment("请求头信息（JSON格式），示例：`{\"Accept-Language\": \"en-US\", \"Cookie\": \"...\"}`")
+                .HasColumnType("json")
+                .HasColumnName("headers");
+            entity.Property(e => e.HttpVersion)
+                .HasMaxLength(10)
+                .HasComment("HTTP协议版本，示例：\"HTTP/1.1\" 或 \"HTTP/2\"")
+                .HasColumnName("http_version");
+            entity.Property(e => e.IpAddress)
+                .HasMaxLength(45)
+                .HasComment("客户端IP地址（支持IPv4/IPv6），示例：\"203.0.113.45\" 或 \"2001:db8::1\"")
+                .HasColumnName("ip_address");
+            entity.Property(e => e.IpId)
+                .HasMaxLength(64)
+                .HasComputedColumnSql("sha2(concat(`ip_address`,`request_time`),256)", true)
+                .HasComment("通过IP和时间戳生成的哈希值，用于匿名化标识")
+                .HasColumnName("ip_id");
+            entity.Property(e => e.IsBot)
+                .HasDefaultValueSql("'0'")
+                .HasComment("是否为爬虫/机器人请求，TRUE/FALSE")
+                .HasColumnName("is_bot");
+            entity.Property(e => e.OsName)
+                .HasMaxLength(50)
+                .HasComment("操作系统名称及版本，示例：Windows 10、iOS 16.5")
+                .HasColumnName("os_name");
+            entity.Property(e => e.Referer)
+                .HasMaxLength(2048)
+                .HasComment("来源页面URL（可选），示例：\"https://example.com/home\"")
+                .HasColumnName("referer");
+            entity.Property(e => e.RequestBody)
+                .HasComment("请求体内容（敏感信息需脱敏），示例：`{\"username\":\"test\",\"password\":\"***\"}`")
+                .HasColumnType("text")
+                .HasColumnName("request_body");
+            entity.Property(e => e.RequestMethod)
+                .HasMaxLength(10)
+                .HasComment("HTTP请求方法，示例：GET、POST、PUT、DELETE")
+                .HasColumnName("request_method");
+            entity.Property(e => e.RequestTime)
+                .HasComment("请求时间（精确到毫秒），示例：\"2023-10-25 14:30:45.123\"")
+                .HasColumnType("datetime(3)")
+                .HasColumnName("request_time");
+            entity.Property(e => e.RequestUrl)
+                .HasMaxLength(2048)
+                .HasComment("完整请求路径（含查询参数），示例：\"/api/login?token=abc123\"")
+                .HasColumnName("request_url");
+            entity.Property(e => e.ResponseStatus)
+                .HasComment("服务器响应状态码，示例：200（成功）、404（未找到）、500（服务器错误）")
+                .HasColumnName("response_status");
+            entity.Property(e => e.ResponseTimeMs)
+                .HasComment("服务器处理请求耗时（毫秒），示例：125")
+                .HasColumnName("response_time_ms");
+            entity.Property(e => e.SessionId)
+                .HasMaxLength(128)
+                .HasComment("用户会话ID（如有），示例：\"sess_abc123xyz\"")
+                .HasColumnName("session_id");
+            entity.Property(e => e.ThreatLevel)
+                .HasDefaultValueSql("'0'")
+                .HasComment("威胁等级（0-5），0=正常，3=可疑，5=攻击行为")
+                .HasColumnName("threat_level");
+            entity.Property(e => e.UserAgent)
+                .HasComment("客户端浏览器/设备信息，示例：\"Mozilla/5.0 (Windows NT 10.0; Win64; x64)...\"")
+                .HasColumnType("text")
+                .HasColumnName("user_agent");
+            entity.Property(e => e.UserId)
+                .HasMaxLength(64)
+                .HasComment("关联用户ID（如已登录），示例：\"usr_456\"")
+                .HasColumnName("user_id");
         });
 
         modelBuilder.Entity<Loginsession>(entity =>
