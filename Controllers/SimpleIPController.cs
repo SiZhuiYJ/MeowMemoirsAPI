@@ -1,23 +1,28 @@
 ﻿using MeowMemoirsAPI.Interfaces;
+using MeowMemoirsAPI.Middleware.auth;
 using MeowMemoirsAPI.Models.DataBaseContext;
 using MeowMemoirsAPI.Models.Http;
 using MeowMemoirsAPI.Models.IP;
+using MeowMemoirsAPI.Models.Log;
 using MeowMemoirsAPI.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
+using System.Reflection.Metadata;
 using System.Text.Json;
 
 namespace MeowMemoirsAPI.Controllers
 {
     [ApiController]
     [Route("MeowMemoirs/SimpleIP")]
-    public class SimpleIPController(ISimpleIPQueryService ipService, MyRainbowContext dbContext) : ControllerBase
+    public class SimpleIPController(ISimpleIPQueryService ipService, MyRainbowContext dbContext, ILogService logService, IHttpContextAccessor httpContextAccessor) : ControllerBase
     {
         private readonly ISimpleIPQueryService _ipService = ipService;
         private readonly MyRainbowContext _dbContext = dbContext;
+        private readonly ILogService _logService = logService;
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
         private readonly Stopwatch _stopwatch = new Stopwatch();
 
 
@@ -70,7 +75,37 @@ namespace MeowMemoirsAPI.Controllers
 
             return HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1";
         }
+        #region 使用统一方法处理Token验证
+        private async Task<(User? user, string error)> ValidateAccessToken()
+        {
+            var (login, type) = HttpContext.GetRequestUser();
+            if (type != "access" || login == null)
+            {
+                _logService.LogError(new LogError
+                {
+                    Token = JsonSerializer.Serialize(login),
+                    Ip = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString() ?? "",
+                    DeviceInfo = Request.Headers.UserAgent.ToString(),
+                    Name = nameof(ValidateAccessToken),
+                    DateTime = DateTime.Now,
+                    RequestBody = type,
+                    Message = "非法token类型"
+                });
+                return (null, "非法token");
+            }
 
+            var user = await _dbContext.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u =>
+                    u.RainbowId == login.RainbowId &&
+                    u.Permissions == login.Permissions &&
+                    u.UserName == login.UserName);
+
+            return user == null
+                ? (null, "用户不存在或登录过期")
+                : (user, "");
+        }
+        #endregion
 
         private async Task<string> SetClientIPAsync(string ip)
         {
@@ -80,6 +115,8 @@ namespace MeowMemoirsAPI.Controllers
             // 1. 获取请求上下文信息
             var request = HttpContext.Request;
             var clientIP = ip;
+            var (user, error) = await ValidateAccessToken();
+
 
             // 2. 构建日志实体
             var logEntry = new IpAccessLog
@@ -94,7 +131,8 @@ namespace MeowMemoirsAPI.Controllers
                 ResponseTimeMs = 0,  // 稍后计算
                 Referer = request.Headers.Referer.ToString(),
                 Headers = JsonSerializer.Serialize(request.Headers),
-                GeoLocation = JsonSerializer.Serialize(_ipService.GetIPInfo(clientIP))
+                GeoLocation = JsonSerializer.Serialize(_ipService.GetIPInfo(clientIP)),
+                UserId = user?.UserId.ToString(),
             };
 
             // 3. 计算响应耗时
@@ -109,6 +147,7 @@ namespace MeowMemoirsAPI.Controllers
             }
             catch (DbUpdateException ex)
             {
+                _logService.LogError(new LogError { Token = "", Ip = ip ?? "", DeviceInfo = logEntry.UserAgent ?? "", Name = "BlogController.UploadBlog", DateTime = DateTime.Now, Message = ex.Message });
                 // 实际项目应使用ILogger
                 Console.WriteLine($"Database error: {ex.Message}");
             }
