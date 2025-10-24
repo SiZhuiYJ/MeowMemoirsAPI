@@ -98,7 +98,7 @@ namespace MeowMemoirsAPI.Controllers
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u =>
                     u.RainbowId == login.RainbowId &&
-                    u.Permissions == login.Permissions &&
+                    u.PermissionLevel == login.PermissionLevel &&
                     u.UserName == login.UserName);
 
             return user == null
@@ -132,12 +132,12 @@ namespace MeowMemoirsAPI.Controllers
                 Referer = request.Headers.Referer.ToString(),
                 Headers = JsonSerializer.Serialize(request.Headers),
                 GeoLocation = JsonSerializer.Serialize(_ipService.GetIPInfo(clientIP)),
-                UserId = user?.UserId.ToString(),
+                UserId = user?.Id.ToString(),
             };
 
             // 3. 计算响应耗时
             _stopwatch.Stop();
-            logEntry.ResponseTimeMs = (int)_stopwatch.ElapsedMilliseconds;
+            logEntry.ResponseTimeMs = (uint?)(int)_stopwatch.ElapsedMilliseconds;
 
             // 4. 异步记录到数据库
             try

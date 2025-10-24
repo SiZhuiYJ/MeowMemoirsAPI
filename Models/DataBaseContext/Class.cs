@@ -11,14 +11,17 @@ public partial class Class
     /// <summary>
     /// 课程ID
     /// </summary>
-    public int Id { get; set; }
+    public ulong Id { get; set; }
 
-    public int UserId { get; set; }
+    /// <summary>
+    /// 用户ID
+    /// </summary>
+    public ulong UserId { get; set; }
 
     /// <summary>
     /// 课程名
     /// </summary>
-    public string Name { get; set; } = null!;
+    public string ClassName { get; set; } = null!;
 
     /// <summary>
     /// 地点
@@ -26,19 +29,19 @@ public partial class Class
     public string Location { get; set; } = null!;
 
     /// <summary>
-    /// 周几（0-6）
+    /// 周几(1-7)
     /// </summary>
-    public sbyte DayOfWeek { get; set; }
+    public byte DayOfWeek { get; set; }
 
     /// <summary>
-    /// 周数（JSON数组）
+    /// 周数(JSON数组)
     /// </summary>
-    public string Week { get; set; } = null!;
+    public string WeekList { get; set; } = null!;
 
     /// <summary>
-    /// 节次（JSON数组）
+    /// 节次(JSON数组)
     /// </summary>
-    public string Number { get; set; } = null!;
+    public string SessionList { get; set; } = null!;
 
     /// <summary>
     /// 教师
@@ -55,9 +58,35 @@ public partial class Class
     /// </summary>
     public string? Remark { get; set; }
 
-    public DateTime? CreatedAt { get; set; }
+    /// <summary>
+    /// 0-正常 1-删除
+    /// </summary>
+    public sbyte IsDeleted { get; set; }
 
-    public DateTime? UpdatedAt { get; set; }
+    /// <summary>
+    /// 创建时间
+    /// </summary>
+    public DateTime CreateTime { get; set; }
+
+    /// <summary>
+    /// 更新时间
+    /// </summary>
+    public DateTime UpdateTime { get; set; }
+
+    /// <summary>
+    /// 扩展字段1
+    /// </summary>
+    public string? ExtAttr1 { get; set; }
+
+    /// <summary>
+    /// 扩展字段2
+    /// </summary>
+    public string? ExtAttr2 { get; set; }
+
+    /// <summary>
+    /// 扩展字段3
+    /// </summary>
+    public string? ExtAttr3 { get; set; }
 
     public virtual User User { get; set; } = null!;
 }

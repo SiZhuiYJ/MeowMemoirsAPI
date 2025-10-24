@@ -14,7 +14,6 @@ namespace MeowMemoirsAPI.Controllers
     /// <summary>
     /// 用户认证控制器
     /// </summary>
-    /// <param name="DbContext"></param>
     /// <param name="logService"></param>
     /// <param name="authService"></param>
     /// <param name="httpContextAccessor"></param>
@@ -117,11 +116,11 @@ namespace MeowMemoirsAPI.Controllers
                 {
                     RainbowId = addUser.RainbowId,
                     UserName = addUser.UserName,
-                    UserPwd = addUser.UserPwd,
+                    UserPassword = addUser.UserPwd,
                     UserPhone = addUser.UserPhone,
                     UserImg = addUser.UserImg,
-                    Question = addUser.Question,
-                    SecPwd = addUser.SecPwd,
+                    SecurityQuestion = addUser.SecurityQuestion,
+                    SecurityAnswer = addUser.SecurityAnswer,
                     UserEmail = addUser.UserEmail // 直接赋值，EF会忽略null值
                 };
                 
@@ -195,7 +194,7 @@ namespace MeowMemoirsAPI.Controllers
                     });
                 }
 
-                var (isBlacklisted, expireTime) = await _authService.IsBlacklistedAsync(user.UserId.ToString());
+                var (isBlacklisted, expireTime) = await _authService.IsBlacklistedAsync(user.Id.ToString());
                 if (isBlacklisted)
                 {
                     var message = expireTime.HasValue
@@ -280,7 +279,7 @@ namespace MeowMemoirsAPI.Controllers
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u =>
                     u.RainbowId == login.RainbowId &&
-                    u.Permissions == login.Permissions &&
+                    u.PermissionLevel == login.PermissionLevel &&
                     u.UserName == login.UserName);
 
             return user == null
@@ -313,7 +312,7 @@ namespace MeowMemoirsAPI.Controllers
                     return Ok(new HttpData { Code = 401, Message = error });
                 }
 
-                var menuList = _authService.GetMenulist(user.Permissions);
+                var menuList = _authService.GetMenulist(user.PermissionLevel);
                 return Ok(new HttpData
                 {
                     Code = 200,
@@ -362,7 +361,7 @@ namespace MeowMemoirsAPI.Controllers
                 }
 
                 var buttonList = await _authService.GetButtonPermissionsAsync(user.RainbowId);
-                var roleList = new[] { user.Permissions };
+                var roleList = new[] { user.PermissionLevel };
 
                 return Ok(new HttpData
                 {
@@ -428,7 +427,7 @@ namespace MeowMemoirsAPI.Controllers
                     .AsNoTracking()
                     .FirstOrDefaultAsync(u =>
                         u.RainbowId == login.RainbowId &&
-                        u.Permissions == login.Permissions &&
+                        u.PermissionLevel == login.PermissionLevel &&
                         u.UserName == login.UserName);
 
                 if (user == null)
@@ -441,7 +440,7 @@ namespace MeowMemoirsAPI.Controllers
                 }
 
                 // 检查账号封禁状态
-                var (isBlacklisted, expireTime) = await _authService.IsBlacklistedAsync(user.UserId.ToString());
+                var (isBlacklisted, expireTime) = await _authService.IsBlacklistedAsync(user.Id.ToString());
                 if (isBlacklisted && (!expireTime.HasValue || expireTime.Value >= DateTime.Now))
                 {
                     var message = expireTime.HasValue
@@ -455,9 +454,9 @@ namespace MeowMemoirsAPI.Controllers
                 }
 
                 // 验证刷新令牌
-                var latestSession = await _dbContext.Loginsessions
-                    .Where(ls => ls.UserId == user.UserId)
-                    .OrderByDescending(ls => ls.LastActivity)
+                var latestSession = await _dbContext.LoginSessions
+                    .Where(ls => ls.UserId == user.Id)
+                    .OrderByDescending(ls => ls.UpdateTime)
                     .FirstOrDefaultAsync();
 
                 if (latestSession == null ||
@@ -483,7 +482,7 @@ namespace MeowMemoirsAPI.Controllers
                 var jwtToken = _jwtService.GenerateEncodedTokenAsync(user.RainbowId, user);
 
                 // 更新会话
-                latestSession.LastActivity = DateTime.Now;
+                latestSession.UpdateTime = DateTime.Now;
                 var sessionSaved = await _authService.SaveLoginSessionAsync(user, jwtToken, agent, ip ?? "");
 
                 if (sessionSaved == 0)

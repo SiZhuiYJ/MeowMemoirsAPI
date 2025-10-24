@@ -57,7 +57,7 @@ namespace MeowMemoirsAPI.Controllers
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u =>
                     u.RainbowId == login.RainbowId &&
-                    u.Permissions == login.Permissions &&
+                    u.PermissionLevel == login.PermissionLevel &&
                     u.UserName == login.UserName);
 
             return user == null
@@ -77,7 +77,7 @@ namespace MeowMemoirsAPI.Controllers
             var (ip, agent) = GetClientInfo();
             try
             {
-                var blogs = await _dbContext.Blogs.Select(b => new { b.Id, b.Title, b.CoverContent, b.CreatedAt, b.UpdatedAt, b.Tags }).ToListAsync();
+                var blogs = await _dbContext.Blogs.Select(b => new { b.Id, b.Title, b.Summary, b.CreateTime, b.UpdateTime, b.Tags }).ToListAsync();
                 return Ok(new HttpData() { Code = 200, Data = new { blogs }, Message = "获取成功" });
             }
             catch (Exception ex)
@@ -99,7 +99,7 @@ namespace MeowMemoirsAPI.Controllers
             var (ip, agent) = GetClientInfo();
             try
             {
-                var tags = await _dbContext.Blogtags.Where(b => b.TagStatus == 1).Select(b => new { b.TagId, b.TagName, b.TagColor }).Distinct().ToListAsync();
+                var tags = await _dbContext.BlogTags.Where(b => b.TagStatus == 1).Select(b => new { b.Id, b.TagName, b.TagColor }).Distinct().ToListAsync();
                 return Ok(new HttpData { Code = 200, Data = new { tags }, Message = "获取成功" });
             }
             catch (Exception ex)
@@ -172,10 +172,10 @@ namespace MeowMemoirsAPI.Controllers
                     {
                         Title = blog.Title,
                         Content = blog.Content,
-                        CoverContent = blog.CoverContent,
-                        UserId = user.UserId,
-                        CreatedAt = DateTime.Now,
-                        UpdatedAt = DateTime.Now
+                        Summary = blog.Summary,
+                        UserId = user.Id,
+                        CreateTime = DateTime.Now,
+                        UpdateTime = DateTime.Now
                     };
                     _dbContext.Blogs.Add(addBlog);
                     var context = await _dbContext.SaveChangesAsync();
@@ -197,7 +197,7 @@ namespace MeowMemoirsAPI.Controllers
                     }
                     existingBlog.Title = blog.Title;
                     existingBlog.Content = blog.Content;
-                    existingBlog.UpdatedAt = DateTime.Now;
+                    existingBlog.UpdateTime = DateTime.Now;
                     _dbContext.Blogs.Update(existingBlog);
                     var context = await _dbContext.SaveChangesAsync();
                     if (context <= 0)
@@ -225,7 +225,6 @@ namespace MeowMemoirsAPI.Controllers
         /// 添加博客标签
         /// </summary>
         /// <param name="blogTag"></param>
-        /// <param name="tagColor"></param>
         /// <returns></returns>
         [HttpPost("AddBlogTag")]
         public async Task<IActionResult> AddBlogTag([FromBody] TagDto blogTag)
@@ -243,18 +242,18 @@ namespace MeowMemoirsAPI.Controllers
                     _logService.LogError(new LogError { Token = "", Ip = ip ?? "", DeviceInfo = agent ?? "", Name = "BlogController.AddBlogTag", DateTime = DateTime.Now, Message = error, RequestBody = JsonSerializer.Serialize(blogTag) });
                     return Unauthorized(new HttpData { Code = 401, Message = error });
                 }
-                var newTag = new Blogtag
+                var newTag = new BlogTag
                 {
                     TagName = blogTag.TagName,
                     TagColor = blogTag.TagColor,
                     TagIcon = blogTag.TagIcon,
                     TagDescription = blogTag.TagDescription,
-                    UserId = user.UserId,
+                    UserId = user.Id,
                     TagStatus = 1,
                 };
-                _dbContext.Blogtags.Add(newTag);
+                _dbContext.BlogTags.Add(newTag);
                 await _dbContext.SaveChangesAsync();
-                return Ok(new HttpData { Code = 200, Message = "标签添加成功", Data = new { tagId = newTag.TagId } });
+                return Ok(new HttpData { Code = 200, Message = "标签添加成功", Data = new { tagId = newTag.Id } });
             }
             catch (Exception ex)
             {

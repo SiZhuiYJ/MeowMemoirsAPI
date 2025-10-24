@@ -32,10 +32,10 @@
         /// <summary>
         /// 安全问题
         /// </summary>
-        public string? Question { get; set; }
+        public string? SecurityQuestion { get; set; }
         /// <summary>
         /// 安全问题答案
         /// </summary>
-        public string? SecPwd { get; set; }
+        public string? SecurityAnswer { get; set; }
     }
 }

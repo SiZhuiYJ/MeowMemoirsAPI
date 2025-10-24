@@ -6,17 +6,17 @@ namespace MeowMemoirsAPI.Models.DataBaseContext;
 /// <summary>
 /// 博客标签表
 /// </summary>
-public partial class Blogtag
+public partial class BlogTag
 {
     /// <summary>
     /// 标签ID
     /// </summary>
-    public int TagId { get; set; }
+    public ulong Id { get; set; }
 
     /// <summary>
     /// 创建者ID
     /// </summary>
-    public int UserId { get; set; }
+    public ulong UserId { get; set; }
 
     /// <summary>
     /// 标签名称
@@ -39,14 +39,39 @@ public partial class Blogtag
     public string TagDescription { get; set; } = null!;
 
     /// <summary>
-    /// 标签状态
+    /// 0-禁用 1-启用
     /// </summary>
-    public int TagStatus { get; set; }
+    public sbyte TagStatus { get; set; }
 
     /// <summary>
-    /// 标签创建时间
+    /// 0-正常 1-删除
     /// </summary>
-    public DateTime TagCreateTime { get; set; }
+    public sbyte IsDeleted { get; set; }
+
+    /// <summary>
+    /// 创建时间
+    /// </summary>
+    public DateTime CreateTime { get; set; }
+
+    /// <summary>
+    /// 更新时间
+    /// </summary>
+    public DateTime UpdateTime { get; set; }
+
+    /// <summary>
+    /// 扩展字段1
+    /// </summary>
+    public string? ExtAttr1 { get; set; }
+
+    /// <summary>
+    /// 扩展字段2
+    /// </summary>
+    public string? ExtAttr2 { get; set; }
+
+    /// <summary>
+    /// 扩展字段3
+    /// </summary>
+    public string? ExtAttr3 { get; set; }
 
     public virtual User User { get; set; } = null!;
 }

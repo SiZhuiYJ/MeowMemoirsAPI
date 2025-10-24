@@ -52,7 +52,7 @@ namespace MeowMemoirsAPI.Controllers
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u =>
                     u.RainbowId == login.RainbowId &&
-                    u.Permissions == login.Permissions &&
+                    u.PermissionLevel == login.PermissionLevel &&
                     u.UserName == login.UserName);
 
             return user == null

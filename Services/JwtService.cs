@@ -29,7 +29,7 @@ namespace MeowMemoirsAPI.Services
             {
                 new("rainbowid", user.RainbowId),
                 new("username", user.UserName),
-                new("permissions",user.Permissions),
+                new("permissionLevel",user.PermissionLevel),
                 // token验证类型access 或者 refresh
                 new("token_type","access"),
                 //new("userimg",user.UserImg),
@@ -43,7 +43,7 @@ namespace MeowMemoirsAPI.Services
             {
                 new("rainbowid", user.RainbowId),
                 new("username", user.UserName),
-                new("permissions",user.Permissions),
+                new("permissionLevel",user.PermissionLevel),
                 // token验证类型access 或者 refresh
                 new("token_type","refresh"),
                 //new("userimg",user.UserImg),

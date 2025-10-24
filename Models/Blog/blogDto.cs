@@ -17,7 +17,7 @@
         /// <summary>
         /// 博客封面内容（100字以内）
         /// </summary>
-        public required string CoverContent { get; set; } = string.Empty;
+        public required string Summary { get; set; } = string.Empty;
         /// <summary>
         /// 博客内容
         /// </summary>

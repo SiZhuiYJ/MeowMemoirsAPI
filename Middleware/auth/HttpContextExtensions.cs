@@ -21,7 +21,7 @@ namespace MeowMemoirsAPI.Middleware.auth
             {
                 RainbowId = claims.FirstOrDefault(c => c.Type == "rainbowid")?.Value ?? "",
                 UserName = claims.FirstOrDefault(c => c.Type == "username")?.Value ?? "",
-                Permissions = claims.FirstOrDefault(c => c.Type == "permissions")?.Value ?? ""
+                PermissionLevel = claims.FirstOrDefault(c => c.Type == "permissionLevel")?.Value ?? ""
             };
             var typeClaim = claims.FirstOrDefault(c => c.Type == "token_type")?.Value ?? "";
             return (user, type: typeClaim);

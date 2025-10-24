@@ -48,7 +48,7 @@ namespace MeowMemoirsAPI.Controllers
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u =>
                     u.RainbowId == login.RainbowId &&
-                    u.Permissions == login.Permissions &&
+                    u.PermissionLevel == login.PermissionLevel &&
                     u.UserName == login.UserName);
 
             return user == null
@@ -60,7 +60,6 @@ namespace MeowMemoirsAPI.Controllers
         /// <summary>
         /// 获取用户班级列表
         /// </summary>
-        /// <param name="userId"></param>
         /// <returns></returns>
         [HttpPost("PostClassesList")]
         public async Task<IActionResult> PostClassesList()
@@ -86,7 +85,7 @@ namespace MeowMemoirsAPI.Controllers
                         Message = error
                     });
                 }
-                var classesList = _dbContext.Classes.Where(c => c.UserId == user.UserId).ToList();
+                var classesList = _dbContext.Classes.Where(c => c.UserId == user.Id).ToList();
                 return await Task.FromResult<IActionResult>(Ok(new { code = 200, message = "获取成功", data = classesList }));
             }
             catch (Exception ex)
@@ -106,7 +105,7 @@ namespace MeowMemoirsAPI.Controllers
             var (ip, agent) = GetClientInfo();
             try
             {
-                var classesList = _dbContext.Classes.Where(c => c.UserId == userId).ToList();
+                var classesList = _dbContext.Classes.Where(c => c.UserId == (ulong)userId).ToList();
                 return await Task.FromResult<IActionResult>(Ok(new { code = 200, message = "获取成功", data = classesList }));
             }
             catch (Exception ex)

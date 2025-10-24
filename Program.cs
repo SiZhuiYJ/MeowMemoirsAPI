@@ -15,11 +15,12 @@ var builder = WebApplication.CreateBuilder(args);
 //builder.Services.AddMemoryCache();// 开启内存缓存
 
 #region 数据库连接
-// 远程连接数据库：scaffold-dbcontext 'Server=8.137.127.7;Database=database;charset=utf8;uid=root;pwd=a743ac967ce1cda0;port=3306;' Pomelo.EntityFrameworkCore.MySql -OutputDir Models/DataBaseContext -context MyRainbowContext -Force
-//scaffold-dbcontext 'Server=localhost;Database=MyDatabase;charset=utf8;uid=root;pwd=0129Hxxx;port=3306;' Pomelo.EntityFrameworkCore.MySql -OutputDir Models/DataBaseContext -context MyRainbowContext -Force
+// 远程连接数据库：scaffold-dbcontext 'Server=8.137.127.7;Database=rainbow_database;charset=utf8;uid=Rainbow_Database;pwd=HT6B5s5zrsrf2CPF;port=3306;' Pomelo.EntityFrameworkCore.MySql -OutputDir Models/DataBaseContext -context MyRainbowContext -Force
+// 本地连接数据库：scaffold-dbcontext 'Server=localhost;Database=MyDatabase;charset=utf8;uid=rainbow_database;pwd=HT6B5s5zrsrf2CPF;port=3306;' Pomelo.EntityFrameworkCore.MySql -OutputDir Models/DataBaseContext -context MyRainbowContext -Force
+
 //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 //#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-//    => optionsBuilder.UseMySql("server=localhost;database=MyDatabase;charset=utf8;uid=root;pwd=0129Hxxx;port=3306", Microsoft.EntityFrameworkCore.ServerVersion.Parse("9.3.0-mysql"));
+//    => optionsBuilder.UseMySql("server=8.137.127.7;database=rainbow_database;charset=utf8;uid=Rainbow_Database;pwd=HT6B5s5zrsrf2CPF;port=3306", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.36-mysql"));
 
 builder.Services.AddDbContext<MyRainbowContext>(options =>
     options.UseMySql(builder.Configuration.GetConnectionString("MyDatabaseConnection"),
@@ -85,11 +86,11 @@ builder.Services
             ValidateIssuer = true,
             ValidateAudience = true,
             //Token颁发机构
-            ValidIssuer = jwtConfig.Issuer,
+            ValidIssuer = jwtConfig?.Issuer ?? "LiuYuanJun",
             //颁发给谁
-            ValidAudience = jwtConfig.Audience,
+            ValidAudience = jwtConfig?.Audience ?? "PuChengChao",
             //这里的key要进行加密
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig.SecretKey)),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig?.SecretKey ?? "Liu_Yuanjun_love_Pu_ChengChao_for_a_lifetime")),
             //是否验证Token有效期，使用当前时间与Token的Claims中的NotBefore和Expires对比
             ValidateLifetime = true,
             ClockSkew = TimeSpan.Zero // 严格时间验证

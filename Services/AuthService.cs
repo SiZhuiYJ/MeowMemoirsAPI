@@ -30,15 +30,15 @@ namespace MeowMemoirsAPI.Services
         {
             if (loginType == "UserEmail")
             {
-                return await _DB.Users.FirstOrDefaultAsync(u => u.UserEmail == identifier && u.UserPwd == password);
+                return await _DB.Users.FirstOrDefaultAsync(u => u.UserEmail == identifier && u.UserPassword == password);
             }
             else if (loginType == "RainbowId")
             {
-                return await _DB.Users.FirstOrDefaultAsync(u => u.RainbowId == identifier && u.UserPwd == password);
+                return await _DB.Users.FirstOrDefaultAsync(u => u.RainbowId == identifier && u.UserPassword == password);
             }
             else if (loginType == "UserPhome")
             {
-                return await _DB.Users.FirstOrDefaultAsync(u => u.UserPhone == identifier && u.UserPwd == password);
+                return await _DB.Users.FirstOrDefaultAsync(u => u.UserPhone == identifier && u.UserPassword == password);
             }
             return null;
         }
@@ -57,17 +57,17 @@ namespace MeowMemoirsAPI.Services
         {
             // 检查是否已存在登录会话存在就更新登录会话
 
-            var loginSession = new Loginsession
+            var loginSession = new LoginSession
             {
-                UserId = user.UserId,
+                UserId = user.Id,
                 RefreshToken = jwt.Refresh_token,
                 ExpireTime = DateTime.UtcNow.AddDays(7),
                 CreateTime = DateTime.UtcNow,
-                LastActivity = DateTime.UtcNow,
+                UpdateTime = DateTime.UtcNow,
                 DeviceInfo = deviceInfo,
-                Ip = ip,
+                IpAddress = ip,
             };
-            _DB.Loginsessions.Add(loginSession);
+            _DB.LoginSessions.Add(loginSession);
             return await _DB.SaveChangesAsync();
         }
         #endregion
@@ -103,9 +103,9 @@ namespace MeowMemoirsAPI.Services
         public async Task<string[]> GetButtonPermissionsAsync(string rainbowId)
         {
             var user = await _DB.Users
-                .Include(u => u.Userprofiles)
+                .Include(u => u.UserProfile)
                 .FirstOrDefaultAsync(u => u.RainbowId == rainbowId);
-            if (user == null || user.Userprofiles == null)
+            if (user == null || user.UserProfile == null)
             {
                 return [];
             }
@@ -125,10 +125,10 @@ namespace MeowMemoirsAPI.Services
         /// <returns></returns>
         public async Task<(bool isBlacklisted, DateTime? expireTime)> IsBlacklistedAsync(string value)
         {
-            var isBlacklisted = await _DB.Blacklists.AnyAsync(b => b.Value == value);
+            var isBlacklisted = await _DB.Blacklists.AnyAsync(b => b.BlacklistValue == value);
 
             var expireTime = await _DB.Blacklists
-                .Where(b => b.Value == value)
+                .Where(b => b.BlacklistValue == value)
                 .Select(b => b.ExpireTime)
                 .FirstOrDefaultAsync();
             // 检查用户是否在黑名单中

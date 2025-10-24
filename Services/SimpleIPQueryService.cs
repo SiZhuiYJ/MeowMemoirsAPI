@@ -4,9 +4,6 @@ using MaxMind.GeoIP2.Exceptions;
 using MeowMemoirsAPI.Interfaces;
 using MeowMemoirsAPI.Models.IP;
 using System.Net;
-using System.Net;
-using System.Reflection.PortableExecutable;
-using System.Runtime;
 namespace MeowMemoirsAPI.Services
 {
     // Services/IPQueryService.cs
