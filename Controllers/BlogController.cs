@@ -118,7 +118,7 @@ namespace MeowMemoirsAPI.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet("GetBlogById/{id}")]
-        public async Task<IActionResult> GetBlogById(int id)
+        public async Task<IActionResult> GetBlogById(ulong id)
         {
             var (ip, agent) = GetClientInfo();
             try

@@ -61,6 +61,7 @@ namespace MeowMemoirsAPI.Services
             {
                 UserId = user.Id,
                 RefreshToken = jwt.Refresh_token,
+                AccessToken = jwt.Access_token,
                 ExpireTime = DateTime.UtcNow.AddDays(7),
                 CreateTime = DateTime.UtcNow,
                 UpdateTime = DateTime.UtcNow,
