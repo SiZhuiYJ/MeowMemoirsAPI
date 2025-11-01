@@ -24,14 +24,17 @@ public partial class MyRainbowContext : DbContext
 
     public virtual DbSet<Class> Classes { get; set; }
 
+    public virtual DbSet<Course> Courses { get; set; }
+
     public virtual DbSet<IpAccessLog> IpAccessLogs { get; set; }
 
     public virtual DbSet<LoginSession> LoginSessions { get; set; }
 
+    public virtual DbSet<Schedule> Schedules { get; set; }
+
     public virtual DbSet<User> Users { get; set; }
 
     public virtual DbSet<UserProfile> UserProfiles { get; set; }
-
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -337,6 +340,68 @@ public partial class MyRainbowContext : DbContext
                 .HasConstraintName("fk_class_user");
         });
 
+        modelBuilder.Entity<Course>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PRIMARY");
+
+            entity
+                .ToTable("course", tb => tb.HasComment("课程详情表"))
+                .UseCollation("utf8mb4_0900_ai_ci");
+
+            entity.HasIndex(e => e.CreateTime, "idx_create_time");
+
+            entity.HasIndex(e => e.ScheduleId, "idx_schedule_id");
+
+            entity.Property(e => e.Id)
+                .HasComment("课程表ID")
+                .HasColumnName("id");
+            entity.Property(e => e.Color)
+                .HasMaxLength(7)
+                .HasComment("课程颜色")
+                .HasColumnName("color");
+            entity.Property(e => e.CourseName)
+                .HasMaxLength(255)
+                .HasComment("课程名")
+                .HasColumnName("course_name");
+            entity.Property(e => e.CreateTime)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasComment("创建时间")
+                .HasColumnType("datetime")
+                .HasColumnName("create_time");
+            entity.Property(e => e.ExtAttr1)
+                .HasMaxLength(255)
+                .HasComment("扩展字段1")
+                .HasColumnName("ext_attr1");
+            entity.Property(e => e.ExtAttr2)
+                .HasMaxLength(255)
+                .HasComment("扩展字段2")
+                .HasColumnName("ext_attr2");
+            entity.Property(e => e.ExtAttr3)
+                .HasMaxLength(255)
+                .HasComment("扩展字段3")
+                .HasColumnName("ext_attr3");
+            entity.Property(e => e.IsDeleted)
+                .HasComment("0-正常 1-删除")
+                .HasColumnName("is_deleted");
+            entity.Property(e => e.Remark)
+                .HasComment("备注")
+                .HasColumnType("text")
+                .HasColumnName("remark");
+            entity.Property(e => e.ScheduleId)
+                .HasComment("课表ID")
+                .HasColumnName("schedule_id");
+            entity.Property(e => e.TimeSlots)
+                .HasComment("课程时间段")
+                .HasColumnType("json")
+                .HasColumnName("time_slots");
+            entity.Property(e => e.UpdateTime)
+                .ValueGeneratedOnAddOrUpdate()
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasComment("更新时间")
+                .HasColumnType("datetime")
+                .HasColumnName("update_time");
+        });
+
         modelBuilder.Entity<IpAccessLog>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PRIMARY");
@@ -539,6 +604,71 @@ public partial class MyRainbowContext : DbContext
             entity.HasOne(d => d.User).WithMany(p => p.LoginSessions)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("fk_login_session_user");
+        });
+
+        modelBuilder.Entity<Schedule>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PRIMARY");
+
+            entity
+                .ToTable("schedule", tb => tb.HasComment("课表主表"))
+                .UseCollation("utf8mb4_0900_ai_ci");
+
+            entity.HasIndex(e => e.CreateTime, "idx_create_time");
+
+            entity.HasIndex(e => e.UserId, "idx_user_id");
+
+            entity.Property(e => e.Id)
+                .HasComment("课表ID")
+                .HasColumnName("id");
+            entity.Property(e => e.CreateTime)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasComment("创建时间")
+                .HasColumnType("datetime")
+                .HasColumnName("create_time");
+            entity.Property(e => e.ExtAttr1)
+                .HasMaxLength(255)
+                .HasComment("扩展字段1")
+                .HasColumnName("ext_attr1");
+            entity.Property(e => e.ExtAttr2)
+                .HasMaxLength(255)
+                .HasComment("扩展字段2")
+                .HasColumnName("ext_attr2");
+            entity.Property(e => e.ExtAttr3)
+                .HasMaxLength(255)
+                .HasComment("扩展字段3")
+                .HasColumnName("ext_attr3");
+            entity.Property(e => e.IsDeleted)
+                .HasComment("0-正常 1-删除")
+                .HasColumnName("is_deleted");
+            entity.Property(e => e.Remark)
+                .HasComment("备注")
+                .HasColumnType("text")
+                .HasColumnName("remark");
+            entity.Property(e => e.ScheduleName)
+                .HasMaxLength(255)
+                .HasComment("课程名")
+                .HasColumnName("schedule_name");
+            entity.Property(e => e.StartTime)
+                .HasMaxLength(20)
+                .HasComment("开课时间")
+                .HasColumnName("start_time");
+            entity.Property(e => e.Timetable)
+                .HasComment("作息表")
+                .HasColumnType("json")
+                .HasColumnName("timetable");
+            entity.Property(e => e.UpdateTime)
+                .ValueGeneratedOnAddOrUpdate()
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasComment("更新时间")
+                .HasColumnType("datetime")
+                .HasColumnName("update_time");
+            entity.Property(e => e.UserId)
+                .HasComment("用户ID")
+                .HasColumnName("user_id");
+            entity.Property(e => e.WeekCount)
+                .HasComment("本学期周数")
+                .HasColumnName("week_count");
         });
 
         modelBuilder.Entity<User>(entity =>
