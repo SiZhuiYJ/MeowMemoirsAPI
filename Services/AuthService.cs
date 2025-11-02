@@ -82,7 +82,7 @@ namespace MeowMemoirsAPI.Services
         public List<MenuItem> GetMenulist(string Permissions)
         {
             string filePath;
-            if (Permissions == "v10")
+            if (Permissions == "admin")
                 filePath = Path.Combine(_env.ContentRootPath, "menus_admin.json");
             else
                 filePath = Path.Combine(_env.ContentRootPath, "menus_normal_user.json");
